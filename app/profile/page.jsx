@@ -3,6 +3,7 @@ import {useState,useEffect} from 'react'
 import { useSession } from 'next-auth/react'
 import {  useRouter  } from 'next/navigation'
 import Profile from '@components/Profile'
+import Protected from '@components/Protected'
 
 const myProfile = () => {
   const router = useRouter()
@@ -38,13 +39,15 @@ const myProfile = () => {
         if(session?.user.id) fetchPosts()
         },[])
   return (
-   <Profile
+   <Protected>
+    <Profile
    name = "my"
    desc = "welcome to your personalized profile page"
    data={posts}
    handleEdit = {handleEdit}
    handleDelete={handleDelete}
    />
+   </Protected>
   )
 }
 

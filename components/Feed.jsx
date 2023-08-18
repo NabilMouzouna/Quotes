@@ -20,10 +20,28 @@ const QuoteCardList = ({data,handleTagClick}) => {
  }
 const Feed = () => {
   const [searchText, setSearchText] = useState('')
+  const [searchTimeout, setSearchTimeout] = useState(null);
+  const [searchedResults, setSearchedResults] = useState([]);
   const [posts, setPosts] = useState([])
-  const handleSearchChange = (e) => { 
-    
+
+  const filteredQuotes = () => {
+    const regex = new RegExp(searchText,'i')
+    return posts.filter((post) => regex.test(post.creator.username) ||
+                                  regex.test(post.tag) ||
+                                  regex.test(post.prompt))
    }
+   const handleSearchChange = (e) => {
+    clearTimeout(searchTimeout);
+    setSearchText(e.target.value);
+
+    // debounce method
+    setSearchTimeout(
+      setTimeout(() => {
+        const searchResult = filteredQuotes(e.target.value);
+        setSearchedResults(searchResult);
+      }, 500)
+    );
+  };
    useEffect(() => { 
     const fetchPosts = async () => { 
       try {
@@ -40,7 +58,9 @@ const Feed = () => {
     },[])
   return (
     <section className='feed'>
-      <form className='relative w-full flex-center'>
+      <form 
+      onSubmit={e => {e.preventDefault()}}
+      className='relative w-full flex-center'>
         <input 
         type="text"
         placeholder='Search For Quotes, Tag or Username'
@@ -50,10 +70,17 @@ const Feed = () => {
         className='search_input peer'
          />
       </form>
-      <QuoteCardList 
-      data={posts}
-      handleTagClick={() => {  }}
-      />
+      {
+        searchText?
+        <QuoteCardList 
+        data={searchedResults}
+        handleTagClick={() => {  }}
+        />:
+        <QuoteCardList 
+        data={posts}
+        handleTagClick={() => {  }}
+        />
+      }
     </section>
   )
 }
